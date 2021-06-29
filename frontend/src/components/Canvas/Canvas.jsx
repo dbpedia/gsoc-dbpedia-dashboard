@@ -29,13 +29,18 @@ export default function Canvas() {
                 <TextField
                     id="outlined-full-width"
                     label="SPARQL Endpoint"
-                    style={{ margin: 8 }}
-                    fullWidth
+                    style={{ margin: 8, width: "83%" }}
                     margin="normal"
                     variant="outlined"
+                    color="primary"
                 />
+                <button style={{margin: 8, width: "14%"}} className="btn btn-info">
+                    Freeze
+                </button> 
             </span>
-            <span><button>freeze</button></span>
+            <span>
+                <button>Add Block</button>
+            </span>
         </div>
     )
 }

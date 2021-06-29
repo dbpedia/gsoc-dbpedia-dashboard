@@ -28,7 +28,7 @@ function App() {
         <Route path="/home" exact>
           <Home />
         </Route>
-        <Route path="/canvas" exact>
+        <Route path="/canvas/:dashboard">
           <Canvas />
         </Route>
       </Switch>
