@@ -35,7 +35,7 @@ export default function Canvas() {
                     color="primary"
                 />
                 <button style={{margin: 8, width: "14%"}} className="btn btn-info">
-                    Freeze
+                    Save Endpoint
                 </button> 
             </span>
             <span>

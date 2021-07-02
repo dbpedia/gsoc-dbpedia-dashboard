@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import './Home.css'
-import ReactDOM from "react-dom";
 import { Modal, Form } from "react-bootstrap";
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -10,10 +9,12 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { Link } from "react-router-dom"
-
+import { Link } from "react-router-dom";
+import axios from 'axios';
 
 export default function Home() {
+
+    const wrapper = React.useRef()
 
     const [loginFormShow, setLoginFormShow] = useState(false);
 
@@ -62,14 +63,21 @@ export default function Home() {
 
     const addDashboardToList = (event) => {
         event.preventDefault();
-        let dashboardNameElement = document.getElementById("dashboardName");
-        if (dashboardNameElement != null) {
-            let dashboardName = dashboardNameElement.value;
-            if (dashboardName && dashboardName.trim().length > 0) {
-                records = records.concat(createData(dashboardName.trim(), setDate(), "Draft"))
-                setRows(records);
-                setLoginFormShow(false)
-            }
+        localStorage.setItem('userid', 'karan@dbpedia.org')
+        console.log(localStorage.getItem('userid'))
+        axios.post(
+            '/dashboards', {
+            "userid": localStorage.getItem('userid')
+        }
+        ).then((response) => {
+            console.log(response)
+        })
+
+        let dashboardName = wrapper.current.value;
+        if (dashboardName && dashboardName.trim().length > 0) {
+            records = records.concat(createData(dashboardName.trim(), setDate(), "Draft"))
+            setRows(records);
+            setLoginFormShow(false)
         }
     }
 
@@ -85,9 +93,6 @@ export default function Home() {
                 </span>
                 <span>New Dashboard</span>
             </button>
-            {/* <Link to='/canvas'> */}
-
-            {/* </Link> */}
 
             <div className="m-4">
                 <TableContainer component={Paper}>
@@ -135,7 +140,7 @@ export default function Home() {
                     <Form>
                         <Form.Group>
                             <Form.Label>Name</Form.Label>
-                            <Form.Control placeholder="Dashboard Name" id="dashboardName" />
+                            <Form.Control ref={wrapper} placeholder="Dashboard Name" />
                         </Form.Group>
                         <button className="btn" id="btn-login" onClick={(event) => addDashboardToList(event)}>
                             <span className="p-2">Create</span>
