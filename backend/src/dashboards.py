@@ -13,7 +13,9 @@ class Dashboards:
     def get_dashboards_by_user_id(self, user_id):
         dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
         user_dashboards = []
-        for dashboard in dashboards_collection.find({"user_id": user_id}):
+        for dashboard in dashboards_collection.find(
+                {"user_id": user_id}
+            ):
             user_dashboards.append(dashboard)
         return user_dashboards
 
@@ -24,8 +26,17 @@ class Dashboards:
                     "user_id": user_id,
                     "name": dashboard_name,
                     "date_created": date_created,
-                    "status": "draft"
+                    "status": "Draft"
                 })
+        except:
+            return False
+        return True
+
+    def save_endpoint(self, user_id, dashboard_name, endpoint):
+        dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
+        try:
+            print(user_id, dashboard_name, endpoint)
+            # endpoint handle
         except:
             return False
         return True

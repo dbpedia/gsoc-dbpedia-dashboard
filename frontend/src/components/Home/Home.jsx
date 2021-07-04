@@ -15,7 +15,7 @@ import { Checkbox } from '@material-ui/core';
 
 export default function Home() {
 
-    const wrapper = React.useRef()
+    const dashboardsNameField = React.useRef()
 
     const [loginFormShow, setLoginFormShow] = useState(false);
 
@@ -52,7 +52,7 @@ export default function Home() {
 
     const [rows, setRows] = useState([]);
 
-    const fetchRecords = () => {
+    const getDashboards = () => {
         localStorage.setItem('userid', 'karan@dbpedia.org')
         axios.post('/getdashboards', {
             "userid": localStorage.getItem('userid')
@@ -72,12 +72,10 @@ export default function Home() {
         })
     }
 
-    useEffect(fetchRecords, [])
-
-    const addDashboardToList = (event) => {
+    const addDashboard = (event) => {
         event.preventDefault();
         localStorage.setItem('userid', 'karan@dbpedia.org')
-        let dashboardName = wrapper.current.value;
+        let dashboardName = dashboardsNameField.current.value;
 
         if (dashboardName && dashboardName.trim().length > 0) {
             axios.post(
@@ -92,14 +90,12 @@ export default function Home() {
                     console.log("error in adding the dashboard")
                 }
                 setLoginFormShow(false)
-                fetchRecords();
+                getDashboards();
             })
         }
     }
 
-    const handleRecord = (record) => {
-        // console.log(record);
-    }
+    useEffect(getDashboards, [])
 
     return (
         <div>
@@ -119,14 +115,14 @@ export default function Home() {
                                 <StyledTableCell align="right">Date Created</StyledTableCell>
                                 <StyledTableCell align="right">Status</StyledTableCell>
                                 <StyledTableCell align="right">
-                                    <Checkbox color="white" className={classes.headerCheckbox}></Checkbox>
+                                    <Checkbox className={classes.headerCheckbox}></Checkbox>
                                 </StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {
                                 rows.map(row => (
-                                    <StyledTableRow key={row.name} onClick={() => handleRecord(row)}>
+                                    <StyledTableRow key={row.name}>
                                         <StyledTableCell component="th" scope="row">
                                             <Link to={`/canvas/${row.name}`}>
                                                 {row.name}
@@ -135,7 +131,7 @@ export default function Home() {
                                         <StyledTableCell align="right">{row.date_created}</StyledTableCell>
                                         <StyledTableCell align="right">{row.status}</StyledTableCell>
                                         <StyledTableCell align="right">
-                                            <Checkbox color="white" className={classes.recordCheckbox}></Checkbox>
+                                            <Checkbox className={classes.recordCheckbox}></Checkbox>
                                         </StyledTableCell>
                                     </StyledTableRow>
                                 ))
@@ -164,9 +160,9 @@ export default function Home() {
                     <Form>
                         <Form.Group>
                             <Form.Label>Name</Form.Label>
-                            <Form.Control ref={wrapper} placeholder="Dashboard Name" />
+                            <Form.Control ref={dashboardsNameField} placeholder="Dashboard Name" />
                         </Form.Group>
-                        <button className="btn" id="btn-login" onClick={(event) => addDashboardToList(event)}>
+                        <button className="btn" id="btn-login" onClick={(event) => addDashboard(event)}>
                             <span className="p-2">Create</span>
                         </button>
                     </Form>

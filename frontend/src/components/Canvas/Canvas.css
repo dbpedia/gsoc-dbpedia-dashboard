@@ -14,3 +14,11 @@
     opacity: 1;
     text-align: center;
 }
+
+.modal-90w {
+    min-width: 98%;
+}
+
+.modal-body-spacing {
+    padding: 2;
+}
