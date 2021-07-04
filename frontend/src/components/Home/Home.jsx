@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './Home.css'
 import { Modal, Form } from "react-bootstrap";
 import { withStyles, makeStyles } from '@material-ui/core/styles';
@@ -11,6 +11,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { Link } from "react-router-dom";
 import axios from 'axios';
+import { Checkbox } from '@material-ui/core';
 
 export default function Home() {
 
@@ -37,52 +38,67 @@ export default function Home() {
 
     const useStyles = makeStyles({
         table: {
-            minWidth: 700,
+            minWidth: 100,
         },
+        headerCheckbox: {
+            color: "#FFFFFF"
+        },
+        recordCheckbox: {
+            color: "#282c34"
+        }
     });
 
     const classes = useStyles();
 
-    const createData = (name, dateCreated, status) => {
-        return { name, dateCreated, status };
+    const [rows, setRows] = useState([]);
+
+    const fetchRecords = () => {
+        localStorage.setItem('userid', 'karan@dbpedia.org')
+        axios.post('/getdashboards', {
+            "userid": localStorage.getItem('userid')
+        }).then((response) => {
+            let records = []
+            let data = response["data"]
+            if (data["status"] === true) {
+                for (var i = 0; i < data["dashboards"].length; i++) {
+                    let dash = data["dashboards"][i]
+                    records.push(dash)
+                }
+            } else {
+                console.log("No dashboards found!")
+            }
+            console.log(records)
+            setRows(records)
+        })
     }
 
-    const setDate = () => {
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        let currentDate = new Date()
-        let formattedDate = currentDate.getDate() + "/" + months[currentDate.getMonth()] + "/" + currentDate.getFullYear()
-        return formattedDate
-    }
-
-    var records = [
-        createData('Ontologies', setDate(), "Published"),
-        createData('Sports', setDate(), "Draft"),
-    ];
-
-    const [rows, setRows] = useState(records);
+    useEffect(fetchRecords, [])
 
     const addDashboardToList = (event) => {
         event.preventDefault();
         localStorage.setItem('userid', 'karan@dbpedia.org')
-        console.log(localStorage.getItem('userid'))
-        axios.post(
-            '/dashboards', {
-            "userid": localStorage.getItem('userid')
-        }
-        ).then((response) => {
-            console.log(response)
-        })
-
         let dashboardName = wrapper.current.value;
+
         if (dashboardName && dashboardName.trim().length > 0) {
-            records = records.concat(createData(dashboardName.trim(), setDate(), "Draft"))
-            setRows(records);
-            setLoginFormShow(false)
+            axios.post(
+                '/adddashboard', {
+                "userid": localStorage.getItem('userid'),
+                "dashboard_name": dashboardName.trim()
+            }).then((response) => {
+                let data = response["data"]
+                if (data["status"] === true) {
+                    console.log("dashboard added!")
+                } else {
+                    console.log("error in adding the dashboard")
+                }
+                setLoginFormShow(false)
+                fetchRecords();
+            })
         }
     }
 
     const handleRecord = (record) => {
-        console.log(record);
+        // console.log(record);
     }
 
     return (
@@ -102,20 +118,28 @@ export default function Home() {
                                 <StyledTableCell>Name</StyledTableCell>
                                 <StyledTableCell align="right">Date Created</StyledTableCell>
                                 <StyledTableCell align="right">Status</StyledTableCell>
+                                <StyledTableCell align="right">
+                                    <Checkbox color="white" className={classes.headerCheckbox}></Checkbox>
+                                </StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rows.map((row) => (
-                                <StyledTableRow key={row.name} onClick={() => handleRecord(row)}>
-                                    <StyledTableCell component="th" scope="row">
-                                        <Link to={`/canvas/${row.name}`}>
-                                            {row.name}
-                                        </Link>
-                                    </StyledTableCell>
-                                    <StyledTableCell align="right">{row.dateCreated}</StyledTableCell>
-                                    <StyledTableCell align="right">{row.status}</StyledTableCell>
-                                </StyledTableRow>
-                            ))}
+                            {
+                                rows.map(row => (
+                                    <StyledTableRow key={row.name} onClick={() => handleRecord(row)}>
+                                        <StyledTableCell component="th" scope="row">
+                                            <Link to={`/canvas/${row.name}`}>
+                                                {row.name}
+                                            </Link>
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">{row.date_created}</StyledTableCell>
+                                        <StyledTableCell align="right">{row.status}</StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            <Checkbox color="white" className={classes.recordCheckbox}></Checkbox>
+                                        </StyledTableCell>
+                                    </StyledTableRow>
+                                ))
+                            }
                         </TableBody>
                     </Table>
                 </TableContainer>
