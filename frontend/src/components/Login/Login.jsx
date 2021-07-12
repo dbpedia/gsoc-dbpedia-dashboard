@@ -4,20 +4,20 @@ import * as Keycloak from 'keycloak-js'
 
 export default function Login() {
 
-    function keycloakInit() {
-        var keycloak = new Keycloak({
-            url: 'https://databus.dbpedia.org/auth/',
-            realm: 'databus',
-            clientId: 'dbpedia-dashboard',
-            onLoad: 'login-required'
-        })
+    // function keycloakInit() {
+    //     var keycloak = new Keycloak({
+    //         url: 'https://databus.dbpedia.org/auth/',
+    //         realm: 'databus',
+    //         clientId: 'dbpedia-dashboard',
+    //         onLoad: 'login-required'
+    //     })
 
-        keycloak.init({onLoad: 'login-required'}).then((authenticated) => {
-            console.log(authenticated);
-        }).catch(() => {
-            console.log("failed")
-        })
-    }
+    //     keycloak.init({onLoad: 'login-required'}).then((authenticated) => {
+    //         console.log(authenticated);
+    //     }).catch(() => {
+    //         console.log("failed")
+    //     })
+    // }
 
     // localStorage.setItem("react-token", keycloak.token);
     // localStorage.setItem("react-refresh-token", keycloak.refreshToken);
@@ -39,7 +39,7 @@ export default function Login() {
     return (
         <>
             {/* <span className="material-icons md-48 md-light align-middle" onClick={() => setLoginFormShow(true)}> */}
-            <span className="material-icons md-48 md-light align-middle" onClick={() => keycloakInit()}>
+            <span className="material-icons md-48 md-light align-middle" >
                 account_circle
             </span>
         </>

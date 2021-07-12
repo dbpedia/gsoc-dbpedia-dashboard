@@ -1,33 +1,53 @@
-import os
+import json
+from io import StringIO
 import pymongo
-import urllib.parse
+from SPARQLWrapper import SPARQLWrapper, CSV
+import pandas as pd
 
 class Dashboards:
 
     def __init__(self):
         # self.__client = pymongo.MongoClient('localhost', 27017)
-        self.__client = pymongo.MongoClient("mongodb+srv://test:admin@cluster0.1znag.mongodb.net/dbpedia?retryWrites=true&w=majority")
+        self.__client = pymongo.MongoClient(
+            "mongodb+srv://test:admin@cluster0.1znag.mongodb.net/dbpedia?retryWrites=true&w=majority")
         self.__db = 'dbpedia'
         self.__dashboards_collection = 'dashboards'
+
+    def __execute_sparql(self, endpoint, query, response_format):
+        sparql = SPARQLWrapper(endpoint)
+
+        sparql.setQuery(query=query)
+        sparql.setReturnFormat(response_format)
+
+        print("fetching results...")
+        results = sparql.query().convert()
+        return results
 
     def get_dashboards_by_user_id(self, user_id):
         dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
         user_dashboards = []
-        for dashboard in dashboards_collection.find(
-                {"user_id": user_id}
-            ):
+        for dashboard in dashboards_collection.find({
+            "user_id": user_id
+        }):
             user_dashboards.append(dashboard)
         return user_dashboards
+
+    def get_dashboard(self, user_id, dashboard_name):
+        dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
+        dashboard = dashboards_collection.find_one({"user_id": user_id, "name": dashboard_name})
+        return dashboard
 
     def add_dashboard(self, user_id, dashboard_name, date_created):
         dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
         try:
             dashboards_collection.insert_one({
-                    "user_id": user_id,
-                    "name": dashboard_name,
-                    "date_created": date_created,
-                    "status": "Draft"
-                })
+                "user_id": user_id,
+                "name": dashboard_name,
+                "date_created": date_created,
+                "status": "Draft",
+                "endpoint": "",
+                "blocks": {}
+            })
         except:
             return False
         return True
@@ -35,8 +55,26 @@ class Dashboards:
     def save_endpoint(self, user_id, dashboard_name, endpoint):
         dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
         try:
-            print(user_id, dashboard_name, endpoint)
-            # endpoint handle
+            dashboards_collection.update(
+                {"user_id": user_id, "name": dashboard_name},
+                {"$set": {
+                    "endpoint": endpoint
+                }}, upsert=False
+            )
         except:
             return False
         return True
+
+    def execute_query(self, user_id, dashboard_name, sparql_query):
+        try:
+            dashboard = self.get_dashboard(user_id, dashboard_name)
+            sparql_endpoint = dashboard["endpoint"]
+            if sparql_endpoint != "" and sparql_query != "":
+                results = self.__execute_sparql(sparql_endpoint, sparql_query, CSV)
+                results = pd.read_csv(StringIO(results.decode("UTF-8")), sep=",")
+                columns = results.columns.tolist()
+                results = results.to_json(orient="records")
+                return True, json.loads(results), columns
+            return False, "", []
+        except:
+            return False, "", []
