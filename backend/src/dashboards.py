@@ -4,6 +4,7 @@ import pymongo
 from SPARQLWrapper import SPARQLWrapper, CSV
 import pandas as pd
 
+
 class Dashboards:
 
     def __init__(self):
@@ -46,7 +47,7 @@ class Dashboards:
                 "date_created": date_created,
                 "status": "Draft",
                 "endpoint": "",
-                "blocks": {}
+                "blocks": []
             })
         except:
             return False
@@ -70,11 +71,40 @@ class Dashboards:
             dashboard = self.get_dashboard(user_id, dashboard_name)
             sparql_endpoint = dashboard["endpoint"]
             if sparql_endpoint != "" and sparql_query != "":
-                results = self.__execute_sparql(sparql_endpoint, sparql_query, CSV)
-                results = pd.read_csv(StringIO(results.decode("UTF-8")), sep=",")
+                # results = self.__execute_sparql(sparql_endpoint, sparql_query, CSV)
+                # results = pd.read_csv(StringIO(results.decode("UTF-8")), sep=",")
+                if sparql_query == "pie":
+                    results = pd.read_csv("src/pie.csv")
+                elif sparql_query == "line":
+                    results = pd.read_csv("src/line.csv")
+                else:
+                    results = pd.read_csv("src/bar.csv")
                 columns = results.columns.tolist()
                 results = results.to_json(orient="records")
                 return True, json.loads(results), columns
             return False, "", []
         except:
             return False, "", []
+
+    def save_block(self, user_id, dashboard_name, sparql_query, chart_type, selected_label, selected_value):
+        try:
+            dashboard = self.get_dashboard(user_id, dashboard_name)
+            blocks = dashboard["blocks"]
+            if type(blocks) is dict:
+                blocks = []
+            blocks.append({
+                "sparql_query": sparql_query,
+                "chart_type": chart_type,
+                "selected_label": selected_label,
+                "selected_value": selected_value
+            })
+            dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
+            dashboards_collection.update(
+                {"user_id": user_id, "name": dashboard_name},
+                {"$set": {
+                    "blocks": blocks
+                }}, upsert=False
+            )
+            return True
+        except:
+            return False

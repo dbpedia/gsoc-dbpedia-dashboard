@@ -1,6 +1,7 @@
 from flask import Flask, json, request, jsonify
 from . import dashboards
 from datetime import date
+
 app = None
 
 
@@ -51,15 +52,27 @@ def initialize_routes(app, dashboardsObj):
     @app.route("/saveendpoint", methods=["POST"])
     def save_endpoint():
         user_id = request.json['userid']
-        dashboards_name = request.json['dashboard_name']
+        dashboard_name = request.json['dashboard_name']
         endpoint = request.json['endpoint']
-        status = dashboardsObj.save_endpoint(user_id, dashboards_name, endpoint)
+        status = dashboardsObj.save_endpoint(user_id, dashboard_name, endpoint)
         return jsonify({"status": status})
 
     @app.route("/executequery", methods=["POST"])
     def execute_query():
         user_id = request.json['userid']
-        dashboards_name = request.json['dashboard_name']
+        dashboard_name = request.json['dashboard_name']
         sparql_query = request.json['sparql_query']
-        status, results, columns = dashboardsObj.execute_query(user_id, dashboards_name, sparql_query)
+        status, results, columns = dashboardsObj.execute_query(user_id, dashboard_name, sparql_query)
         return jsonify({"status": status, "data": results, "columns": columns})
+
+    @app.route("/savedashboardblock", methods=["POST"])
+    def save_block():
+        user_id = request.json['userid']
+        dashboard_name = request.json['dashboard_name']
+        sparql_query = request.json['sparql_query']
+        chart_type = request.json['chart_type']
+        selected_label = request.json['selected_label']
+        selected_value = request.json['selected_value']
+        status = dashboardsObj.save_block(user_id, dashboard_name, sparql_query, chart_type, selected_label,
+                                          selected_value)
+        return jsonify({"status": status})

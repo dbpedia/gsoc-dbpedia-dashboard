@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import './Canvas.css'
-import { Modal, Form, Row, Col } from "react-bootstrap";
+import { Modal, Row, Col } from "react-bootstrap";
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios'
-import { TextField, Container, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core';
+import { TextField, Container, FormControl, Select, InputLabel, MenuItem, Paper, Grid } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import { DataGrid } from '@material-ui/data-grid';
+import createPlotlyComponent from 'react-plotly.js/factory'
 
 export default function Canvas() {
     const useStyles = makeStyles((theme) => ({
@@ -18,8 +19,20 @@ export default function Canvas() {
             marginRight: theme.spacing(1),
             width: '25ch',
         },
+        gridroot: {
+            flexGrow: 1,
+            margin: 8,
+            width: "98%"
+        },
+        paper: {
+            padding: theme.spacing(2),
+            textAlign: 'center',
+            color: theme.palette.text.secondary,
+        }
     }));
 
+    const Plotly = window.Plotly
+    const Plot = createPlotlyComponent(Plotly);
     const params = useParams();
     const classes = useStyles();
     const [records, setRecords] = useState([])
@@ -29,12 +42,16 @@ export default function Canvas() {
     const endpointActionBtn = React.useRef()
     const addBlockBtn = React.useRef()
     const query = React.useRef()
+    const [dashboardBlocks, setDashboardBlocks] = useState([])
     const [columns, setColumns] = useState([]);
     const [chartType, setChartType] = useState("")
+    const [selectedLabel, setSelectedLabel] = useState("")
+    const [selectedValue, setSelectedValue] = useState("")
+    const [xValues, setxValues] = useState([])
+    const [yValues, setyValues] = useState([])
 
     const loadDashboard = () => {
         localStorage.setItem('userid', 'karan@dbpedia.org')
-        localStorage.setItem('currentdashboard', 'sports')
         axios.post('/getdashboard', {
             "user_id": localStorage.getItem("userid"),
             "dashboard_name": params['dashboard']
@@ -42,6 +59,7 @@ export default function Canvas() {
             let data = response["data"]
             if (data["status"] === true) {
                 let responseDashboard = data["dashboard"]
+
                 let responseEndpoint = responseDashboard["endpoint"]
                 if (responseEndpoint.length > 0) {
                     endpointField.current.label = ""
@@ -53,12 +71,16 @@ export default function Canvas() {
                     endpointActionBtn.current.innerHTML = "Save Endpoint"
                     setIsDisabled(false)
                 }
+
+                let blocks = responseDashboard["blocks"]
+                let responseBlocks = []
+                for (let index = 0; index < blocks.length; index++) {
+                    responseBlocks.push(blocks[index])
+                }
+                setDashboardBlocks(responseBlocks)
             }
-            // loadBlocks()
         })
     }
-
-    useEffect(loadDashboard, [])
 
     const endpointAction = () => {
         let sparqlEndpoint = endpointField.current.value
@@ -66,7 +88,6 @@ export default function Canvas() {
             let status = endpointActionBtn.current.innerHTML
             if (status === "Save Endpoint") {
                 localStorage.setItem('userid', 'karan@dbpedia.org')
-                localStorage.setItem('currentdashboard', 'sports')
                 axios.post('/saveendpoint', {
                     "userid": localStorage.getItem('userid'),
                     "dashboard_name": params['dashboard'],
@@ -85,6 +106,8 @@ export default function Canvas() {
     const executeQuery = () => {
         let sparqlQuery = query.current.value
         localStorage.setItem('userid', 'karan@dbpedia.org')
+        // console.log(params['dashboard'])
+        // console.log(sparqlQuery.trim())
         if (sparqlQuery && sparqlQuery.trim().length > 0) {
             axios.post("/executequery", {
                 "userid": localStorage.getItem("userid"),
@@ -99,7 +122,8 @@ export default function Canvas() {
                         responseColumns.push({
                             field: data["columns"][i],
                             headerName: data["columns"][i],
-                            width: "100%"
+                            minWidth: "400px",
+                            width: "500px"
                         })
                     }
                     for (var i = 0; i < data["data"].length; i++) {
@@ -114,9 +138,52 @@ export default function Canvas() {
         }
     }
 
-    const handleChange = (event) => {
+    const handleChangeChartType = (event) => {
         setChartType(event.target.value);
-      };
+    };
+
+    const handleChangeSelectedLabel = (event) => {
+        setSelectedLabel(event.target.value);
+    };
+
+    const handleChangeSelectedValue = (event) => {
+        setSelectedValue(event.target.value);
+    };
+
+    const previewVisualization = () => {
+        let xLabels = []
+        let yValues = []
+        for (let index = 0; index < records.length; index++) {
+            xLabels.push(records[index][selectedLabel])
+            yValues.push(records[index][selectedValue])
+        }
+        setxValues(xLabels)
+        setyValues(yValues)
+    }
+
+    const saveBlock = () => {
+        localStorage.setItem('userid', 'karan@dbpedia.org')
+        axios.post('/savedashboardblock', {
+            "userid": localStorage.getItem("userid"),
+            "dashboard_name": params['dashboard'],
+            "sparql_query": query.current.value.trim(),
+            "chart_type": chartType.toString(),
+            "selected_label": selectedLabel.toString(),
+            "selected_value": selectedValue.toString()
+        }).then((response) => {
+            let data = response["data"]
+            if (data["status"] === true) {
+                loadDashboard()
+            } else {
+                console.log("saving failed")
+            }
+            setColumns([])
+            setRecords([])
+            setLoginFormShow(false)
+        })
+    }
+
+    useEffect(loadDashboard, [])
 
     return (
         <div>
@@ -135,10 +202,37 @@ export default function Canvas() {
                     Save Endpoint
                 </button>
                 <button ref={addBlockBtn} style={{ margin: 8, width: "10%" }} className="btn btn-success"
-                    onClick={() => setLoginFormShow(true)}>
+                    onClick={() => {
+                        setColumns([])
+                        setRecords([])
+                        setLoginFormShow(true)
+                    }}>
                     Add Block
                 </button>
             </span>
+
+            <div className={classes.gridroot}>
+                <Grid container spacing={3}>
+                    {
+                        dashboardBlocks.map(dashboardBlock => (
+                            <Grid item xs={6}>
+                                <Paper className={classes.paper}>
+                                    <Plot
+                                        data={[
+                                            {
+                                                type: dashboardBlock["chart_type"],
+                                                x: [1, 2, 3],
+                                                y: [7, 8, 9]
+                                            },
+                                        ]}
+                                        layout={{ width: "100%", height: 240 }}
+                                    />
+                                </Paper>
+                            </Grid>
+                        ))
+                    }
+                </Grid>
+            </div>
 
             <Modal
                 aria-labelledby="contained-modal-title-vcenter"
@@ -177,12 +271,53 @@ export default function Canvas() {
                     {/* Visualization Controller */}
                     <Container>
                         <Row className="justify-content-md-center">
-                            <FormControl style={{width: "20%"}}>
-                                <InputLabel>Chart Type</InputLabel>
-                                <Select value={chartType} onChange={handleChange}>
-                                    <MenuItem value={"Line"}>Line</MenuItem>
-                                </Select>
-                            </FormControl>
+                            <Col className="justify-content-md-center">
+                                <Row>
+                                    <FormControl style={{ width: "50%" }}>
+                                        <InputLabel>Chart Type</InputLabel>
+                                        <Select value={chartType} onChange={handleChangeChartType}>
+                                            <MenuItem value={"line"}>Line</MenuItem>
+                                            <MenuItem value={"bar"}>Bar</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Row>
+                                <Row>
+                                    <FormControl style={{ width: "50%" }}>
+                                        <InputLabel>Labels</InputLabel>
+                                        <Select value={selectedLabel} onChange={handleChangeSelectedLabel}>
+                                            {
+                                                columns.map(column => (
+                                                    <MenuItem value={column.headerName}>{column.headerName}</MenuItem>
+                                                ))
+                                            }
+                                        </Select>
+                                    </FormControl>
+                                </Row>
+                                <Row>
+                                    <FormControl style={{ width: "50%" }}>
+                                        <InputLabel>Values</InputLabel>
+                                        <Select value={selectedValue} onChange={handleChangeSelectedValue}>
+                                            {
+                                                columns.map(column => (
+                                                    <MenuItem value={column.headerName}>{column.headerName}</MenuItem>
+                                                ))
+                                            }
+                                        </Select>
+                                    </FormControl>
+                                </Row>
+                            </Col>
+                            <Col>
+                                <Plot
+                                    data={[
+                                        {
+                                            type: chartType,
+                                            x: xValues,
+                                            y: yValues
+                                        },
+                                    ]}
+                                    layout={{ width: "100%", height: 240 }}
+                                />
+                            </Col>
                         </Row>
                     </Container>
 
@@ -192,11 +327,20 @@ export default function Canvas() {
                             <button
                                 style={{ width: "9%" }}
                                 className="btn btn-danger m-3"
-                                onClick={() => setLoginFormShow(false)}>
+                                onClick={() => {
+                                    setColumns([])
+                                    setRecords([])
+                                    setLoginFormShow(false)
+                                }}>
                                 Cancel
                             </button>
-                            <button style={{ width: "9%" }} className="btn btn-success m-3">
+                            <button style={{ width: "9%" }} className="btn btn-success m-3"
+                                onClick={() => saveBlock()}>
                                 Save
+                            </button>
+                            <button style={{ width: "9%" }} className="btn btn-dark m-3"
+                                onClick={() => previewVisualization()}>
+                                Preview
                             </button>
                         </Row>
                     </Container>
