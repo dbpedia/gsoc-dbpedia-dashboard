@@ -33,10 +33,22 @@ class Dashboards:
             user_dashboards.append(dashboard)
         return user_dashboards
 
-    def get_dashboard(self, user_id, dashboard_name):
+    def get_dashboard(self, user_id, dashboard_name, with_query=False):
         dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
         dashboard = dashboards_collection.find_one({"user_id": user_id, "name": dashboard_name})
-        return dashboard
+        if with_query:
+            blocks_data = []
+            endpoint = dashboard["endpoint"]
+            for block in dashboard["blocks"]:
+                block_data = self.__execute_sparql(endpoint, block["sparql_query"], CSV)
+                block_data = pd.read_csv(StringIO(block_data.decode("UTF-8")), sep=",")
+                block_data = {
+                    block["selected_label"]: block_data[block["selected_label"]].tolist(),
+                    block["selected_value"]: block_data[block["selected_value"]].tolist()
+                }
+                blocks_data.append(block_data)
+            return dashboard, blocks_data
+        return dashboard, []
 
     def add_dashboard(self, user_id, dashboard_name, date_created):
         dashboards_collection = self.__client[self.__db][self.__dashboards_collection]
@@ -68,17 +80,11 @@ class Dashboards:
 
     def execute_query(self, user_id, dashboard_name, sparql_query):
         try:
-            dashboard = self.get_dashboard(user_id, dashboard_name)
+            dashboard, _ = self.get_dashboard(user_id, dashboard_name)
             sparql_endpoint = dashboard["endpoint"]
             if sparql_endpoint != "" and sparql_query != "":
-                # results = self.__execute_sparql(sparql_endpoint, sparql_query, CSV)
-                # results = pd.read_csv(StringIO(results.decode("UTF-8")), sep=",")
-                if sparql_query == "pie":
-                    results = pd.read_csv("src/pie.csv")
-                elif sparql_query == "line":
-                    results = pd.read_csv("src/line.csv")
-                else:
-                    results = pd.read_csv("src/bar.csv")
+                results = self.__execute_sparql(sparql_endpoint, sparql_query, CSV)
+                results = pd.read_csv(StringIO(results.decode("UTF-8")), sep=",")
                 columns = results.columns.tolist()
                 results = results.to_json(orient="records")
                 return True, json.loads(results), columns
@@ -88,7 +94,7 @@ class Dashboards:
 
     def save_block(self, user_id, dashboard_name, sparql_query, chart_type, selected_label, selected_value):
         try:
-            dashboard = self.get_dashboard(user_id, dashboard_name)
+            dashboard, _ = self.get_dashboard(user_id, dashboard_name)
             blocks = dashboard["blocks"]
             if type(blocks) is dict:
                 blocks = []

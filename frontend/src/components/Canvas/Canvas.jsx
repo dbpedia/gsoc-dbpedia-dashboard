@@ -57,6 +57,7 @@ export default function Canvas() {
             "dashboard_name": params['dashboard']
         }).then((response) => {
             let data = response["data"]
+            console.log(data)
             if (data["status"] === true) {
                 let responseDashboard = data["dashboard"]
 
@@ -72,12 +73,22 @@ export default function Canvas() {
                     setIsDisabled(false)
                 }
 
+                let blocksData = responseDashboard["blocks_data"]
                 let blocks = responseDashboard["blocks"]
                 let responseBlocks = []
-                for (let index = 0; index < blocks.length; index++) {
-                    responseBlocks.push(blocks[index])
+                if (blocksData.length == blocks.length) {
+                    for (let index = 0; index < blocksData.length; index++) {
+                        let blockObj = {}
+                        blockObj["chart_type"] = blocks[index]["chart_type"]
+                        blockObj["selected_label"] = blocks[index]["selected_label"]
+                        blockObj["selected_value"] = blocks[index]["selected_value"]
+                        blockObj["selected_label_data"] = blocksData[index][blockObj["selected_label"]]
+                        blockObj["selected_value_data"] = blocksData[index][blockObj["selected_value"]]
+                        responseBlocks.push(blockObj)
+                    }
+                    console.log(responseBlocks)
+                    setDashboardBlocks(responseBlocks)
                 }
-                setDashboardBlocks(responseBlocks)
             }
         })
     }
@@ -101,6 +112,7 @@ export default function Canvas() {
                 endpointActionBtn.current.innerHTML = "Save Endpoint"
             }
         }
+
     }
 
     const executeQuery = () => {
@@ -132,6 +144,8 @@ export default function Canvas() {
                         responseRows.push(rowData)
                     }
                 }
+                // console.log(responseColumns)
+                // console.log(responseRows)
                 setColumns(responseColumns)
                 setRecords(responseRows)
             })
@@ -221,8 +235,8 @@ export default function Canvas() {
                                         data={[
                                             {
                                                 type: dashboardBlock["chart_type"],
-                                                x: [1, 2, 3],
-                                                y: [7, 8, 9]
+                                                x: dashboardBlock["selected_label_data"],
+                                                y: dashboardBlock["selected_value_data"]
                                             },
                                         ]}
                                         layout={{ width: "100%", height: 240 }}

@@ -34,9 +34,10 @@ def initialize_routes(app, dashboardsObj):
     def get_dashboard():
         user_id = request.json["user_id"]
         dashboard_name = request.json['dashboard_name']
-        dashboard = dashboardsObj.get_dashboard(user_id, dashboard_name)
+        dashboard, blocks_data = dashboardsObj.get_dashboard(user_id, dashboard_name, with_query=True)
         if dashboard:
             del dashboard["_id"]
+            dashboard["blocks_data"] = blocks_data
             return jsonify({"status": True, "dashboard": dashboard})
         else:
             return jsonify({"status": False})
