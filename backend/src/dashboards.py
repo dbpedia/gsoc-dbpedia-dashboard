@@ -9,6 +9,8 @@ class Dashboards:
 
     def __init__(self):
         # self.__client = pymongo.MongoClient('localhost', 27017)
+
+        # TODO: remove the public cloud once the platform is deployed
         self.__client = pymongo.MongoClient(
             "mongodb+srv://test:admin@cluster0.1znag.mongodb.net/dbpedia?retryWrites=true&w=majority")
         self.__db = 'dbpedia'
