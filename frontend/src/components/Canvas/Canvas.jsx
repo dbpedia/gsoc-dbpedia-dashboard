@@ -118,8 +118,6 @@ export default function Canvas() {
     const executeQuery = () => {
         let sparqlQuery = query.current.value
         localStorage.setItem('userid', 'karan@dbpedia.org')
-        // console.log(params['dashboard'])
-        // console.log(sparqlQuery.trim())
         if (sparqlQuery && sparqlQuery.trim().length > 0) {
             axios.post("/executequery", {
                 "userid": localStorage.getItem("userid"),
@@ -144,8 +142,6 @@ export default function Canvas() {
                         responseRows.push(rowData)
                     }
                 }
-                // console.log(responseColumns)
-                // console.log(responseRows)
                 setColumns(responseColumns)
                 setRecords(responseRows)
             })
@@ -239,7 +235,7 @@ export default function Canvas() {
                                                 y: dashboardBlock["selected_value_data"]
                                             },
                                         ]}
-                                        layout={{ width: "100%", height: 240 }}
+                                        layout={{ marginLeft: 0 }}
                                     />
                                 </Paper>
                             </Grid>
@@ -329,7 +325,6 @@ export default function Canvas() {
                                             y: yValues
                                         },
                                     ]}
-                                    layout={{ width: "100%", height: 240 }}
                                 />
                             </Col>
                         </Row>
