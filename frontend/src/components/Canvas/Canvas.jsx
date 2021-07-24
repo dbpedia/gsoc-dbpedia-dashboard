@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './Canvas.css'
-import { Modal, Row, Col } from "react-bootstrap";
+import { Modal, Row, Col, Spinner } from "react-bootstrap";
 import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios'
 import { TextField, Container, FormControl, Select, InputLabel, MenuItem, Paper, Grid } from '@material-ui/core';
@@ -28,6 +28,13 @@ export default function Canvas() {
             padding: theme.spacing(2),
             textAlign: 'center',
             color: theme.palette.text.secondary,
+        },
+        paperplot: {
+            width: "100%",
+            height: "300px"
+        },
+        loader: {
+            position: 'absolute', left: '46%', top: '50%'
         }
     }));
 
@@ -35,6 +42,7 @@ export default function Canvas() {
     const Plot = createPlotlyComponent(Plotly);
     const params = useParams();
     const classes = useStyles();
+    const [isLoading, setIsLoading] = useState(true);
     const [records, setRecords] = useState([])
     const [isDisabled, setIsDisabled] = useState(false);
     const [loginFormShow, setLoginFormShow] = useState(false);
@@ -56,6 +64,7 @@ export default function Canvas() {
             "user_id": localStorage.getItem("userid"),
             "dashboard_name": params['dashboard']
         }).then((response) => {
+            setIsLoading(false)
             let data = response["data"]
             console.log(data)
             if (data["status"] === true) {
@@ -197,165 +206,175 @@ export default function Canvas() {
 
     return (
         <div>
-            <span className={classes.root}>
-                <TextField
-                    id="endpointField"
-                    inputRef={endpointField}
-                    style={{ margin: 8, width: "76%" }}
-                    margin="normal"
-                    variant="outlined"
-                    color="primary"
-                    disabled={isDisabled}
-                />
-                <button ref={endpointActionBtn} style={{ margin: 8, width: "10%" }} className="btn btn-info"
-                    onClick={() => endpointAction()}>
-                    Save Endpoint
-                </button>
-                <button ref={addBlockBtn} style={{ margin: 8, width: "10%" }} className="btn btn-success"
-                    onClick={() => {
-                        setColumns([])
-                        setRecords([])
-                        setLoginFormShow(true)
-                    }}>
-                    Add Block
-                </button>
-            </span>
-
-            <div className={classes.gridroot}>
-                <Grid container spacing={3}>
-                    {
-                        dashboardBlocks.map(dashboardBlock => (
-                            <Grid item xs={6}>
-                                <Paper className={classes.paper}>
-                                    <Plot
-                                        data={[
-                                            {
-                                                type: dashboardBlock["chart_type"],
-                                                x: dashboardBlock["selected_label_data"],
-                                                y: dashboardBlock["selected_value_data"]
-                                            },
-                                        ]}
-                                        layout={{ marginLeft: 0 }}
-                                    />
-                                </Paper>
-                            </Grid>
-                        ))
-                    }
-                </Grid>
-            </div>
-
-            <Modal
-                aria-labelledby="contained-modal-title-vcenter"
-                onHide={() => setLoginFormShow(false)}
-                dialogClassName="modal-90w"
-                show={loginFormShow}
-                backdrop="static"
-                keyboard="false">
-                <Modal.Body className={"modal-body-spacing"}>
-
-                    {/* SPARQL query text field */}
-                    <span className={classes.root}>
-                        <TextField
-                            inputRef={query}
-                            label="SPARQL Endpoint"
-                            style={{ width: "88%" }}
-                            margin="normal"
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                        />
-                        <button style={{ width: "9%" }} className="btn btn-info m-3"
-                            onClick={() => executeQuery()}>
-                            Execute
-                        </button>
-                    </span>
-
-                    {/* Table to display the output of SPARQL query execution */}
-                    <div style={{ height: 250, width: "100%" }}>
-                        <DataGrid
-                            rows={records}
-                            columns={columns}
-                            pageSize={5} />
+            {
+                isLoading ?
+                    <div className={classes.loader}>
+                        <Spinner animation="grow" />
+                        <Spinner animation="grow" />
+                        <Spinner animation="grow" />
                     </div>
-
-                    {/* Visualization Controller */}
-                    <Container>
-                        <Row className="justify-content-md-center">
-                            <Col className="justify-content-md-center">
-                                <Row>
-                                    <FormControl style={{ width: "50%" }}>
-                                        <InputLabel>Chart Type</InputLabel>
-                                        <Select value={chartType} onChange={handleChangeChartType}>
-                                            <MenuItem value={"line"}>Line</MenuItem>
-                                            <MenuItem value={"bar"}>Bar</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Row>
-                                <Row>
-                                    <FormControl style={{ width: "50%" }}>
-                                        <InputLabel>Labels</InputLabel>
-                                        <Select value={selectedLabel} onChange={handleChangeSelectedLabel}>
-                                            {
-                                                columns.map(column => (
-                                                    <MenuItem value={column.headerName}>{column.headerName}</MenuItem>
-                                                ))
-                                            }
-                                        </Select>
-                                    </FormControl>
-                                </Row>
-                                <Row>
-                                    <FormControl style={{ width: "50%" }}>
-                                        <InputLabel>Values</InputLabel>
-                                        <Select value={selectedValue} onChange={handleChangeSelectedValue}>
-                                            {
-                                                columns.map(column => (
-                                                    <MenuItem value={column.headerName}>{column.headerName}</MenuItem>
-                                                ))
-                                            }
-                                        </Select>
-                                    </FormControl>
-                                </Row>
-                            </Col>
-                            <Col>
-                                <Plot
-                                    data={[
-                                        {
-                                            type: chartType,
-                                            x: xValues,
-                                            y: yValues
-                                        },
-                                    ]}
-                                />
-                            </Col>
-                        </Row>
-                    </Container>
-
-                    {/* Action Buttons */}
-                    <Container>
-                        <Row className="justify-content-md-center">
-                            <button
-                                style={{ width: "9%" }}
-                                className="btn btn-danger m-3"
+                    :
+                    <div>
+                        <span className={classes.root}>
+                            <TextField
+                                id="endpointField"
+                                inputRef={endpointField}
+                                style={{ margin: 8, width: "76%" }}
+                                margin="normal"
+                                variant="outlined"
+                                color="primary"
+                                disabled={isDisabled}
+                            />
+                            <button ref={endpointActionBtn} style={{ margin: 8, width: "10%" }} className="btn btn-info"
+                                onClick={() => endpointAction()}>
+                                Save Endpoint
+                            </button>
+                            <button ref={addBlockBtn} style={{ margin: 8, width: "10%" }} className="btn btn-success"
                                 onClick={() => {
                                     setColumns([])
                                     setRecords([])
-                                    setLoginFormShow(false)
+                                    setLoginFormShow(true)
                                 }}>
-                                Cancel
+                                Add Block
                             </button>
-                            <button style={{ width: "9%" }} className="btn btn-success m-3"
-                                onClick={() => saveBlock()}>
-                                Save
-                            </button>
-                            <button style={{ width: "9%" }} className="btn btn-dark m-3"
-                                onClick={() => previewVisualization()}>
-                                Preview
-                            </button>
-                        </Row>
-                    </Container>
-                </Modal.Body>
-            </Modal>
+                        </span>
 
+                        <div className={classes.gridroot}>
+                            <Grid container spacing={3}>
+                                {
+                                    dashboardBlocks.map(dashboardBlock => (
+                                        <Grid item lg={6}>
+                                            <Paper className={classes.paper}>
+                                                <Plot className={classes.paperplot}
+                                                    data={[
+                                                        {
+                                                            type: dashboardBlock["chart_type"],
+                                                            x: dashboardBlock["selected_label_data"],
+                                                            y: dashboardBlock["selected_value_data"]
+                                                        },
+                                                    ]}
+
+                                                />
+                                            </Paper>
+                                        </Grid>
+                                    ))
+                                }
+                            </Grid>
+                        </div>
+
+                        <Modal
+                            aria-labelledby="contained-modal-title-vcenter"
+                            onHide={() => setLoginFormShow(false)}
+                            dialogClassName="modal-90w"
+                            show={loginFormShow}
+                            backdrop="static"
+                            keyboard="false">
+                            <Modal.Body className={"modal-body-spacing"}>
+
+                                {/* SPARQL query text field */}
+                                <span className={classes.root}>
+                                    <TextField
+                                        inputRef={query}
+                                        label="SPARQL Endpoint"
+                                        style={{ width: "88%" }}
+                                        margin="normal"
+                                        variant="outlined"
+                                        color="primary"
+                                        size="small"
+                                    />
+                                    <button style={{ width: "9%" }} className="btn btn-info m-3"
+                                        onClick={() => executeQuery()}>
+                                        Execute
+                                    </button>
+                                </span>
+
+                                {/* Table to display the output of SPARQL query execution */}
+                                <div style={{ height: 250, width: "100%" }}>
+                                    <DataGrid
+                                        rows={records}
+                                        columns={columns}
+                                        pageSize={5} />
+                                </div>
+
+                                {/* Visualization Controller */}
+                                <Container>
+                                    <Row className="justify-content-md-center">
+                                        <Col className="justify-content-md-center">
+                                            <Row>
+                                                <FormControl style={{ width: "50%" }}>
+                                                    <InputLabel>Chart Type</InputLabel>
+                                                    <Select value={chartType} onChange={handleChangeChartType}>
+                                                        <MenuItem value={"line"}>Line</MenuItem>
+                                                        <MenuItem value={"bar"}>Bar</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Row>
+                                            <Row>
+                                                <FormControl style={{ width: "50%" }}>
+                                                    <InputLabel>Labels</InputLabel>
+                                                    <Select value={selectedLabel} onChange={handleChangeSelectedLabel}>
+                                                        {
+                                                            columns.map(column => (
+                                                                <MenuItem value={column.headerName}>{column.headerName}</MenuItem>
+                                                            ))
+                                                        }
+                                                    </Select>
+                                                </FormControl>
+                                            </Row>
+                                            <Row>
+                                                <FormControl style={{ width: "50%" }}>
+                                                    <InputLabel>Values</InputLabel>
+                                                    <Select value={selectedValue} onChange={handleChangeSelectedValue}>
+                                                        {
+                                                            columns.map(column => (
+                                                                <MenuItem value={column.headerName}>{column.headerName}</MenuItem>
+                                                            ))
+                                                        }
+                                                    </Select>
+                                                </FormControl>
+                                            </Row>
+                                        </Col>
+                                        <Col>
+                                            <Plot
+                                                data={[
+                                                    {
+                                                        type: chartType,
+                                                        x: xValues,
+                                                        y: yValues
+                                                    },
+                                                ]}
+                                            />
+                                        </Col>
+                                    </Row>
+                                </Container>
+
+                                {/* Action Buttons */}
+                                <Container>
+                                    <Row className="justify-content-md-center">
+                                        <button
+                                            style={{ width: "9%" }}
+                                            className="btn btn-danger m-3"
+                                            onClick={() => {
+                                                setColumns([])
+                                                setRecords([])
+                                                setLoginFormShow(false)
+                                            }}>
+                                            Cancel
+                                        </button>
+                                        <button style={{ width: "9%" }} className="btn btn-success m-3"
+                                            onClick={() => saveBlock()}>
+                                            Save
+                                        </button>
+                                        <button style={{ width: "9%" }} className="btn btn-dark m-3"
+                                            onClick={() => previewVisualization()}>
+                                            Preview
+                                        </button>
+                                    </Row>
+                                </Container>
+                            </Modal.Body>
+                        </Modal>
+                    </div>
+            }
         </div>
     )
 }
