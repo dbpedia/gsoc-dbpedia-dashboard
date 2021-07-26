@@ -1,4 +1,5 @@
-from flask import Flask, json, request, jsonify
+from flask import Flask, request, jsonify
+from flask_caching import Cache
 from . import dashboards
 from datetime import date
 
@@ -7,17 +8,25 @@ app = None
 
 def get_app():
     global app
+    config = {
+        "CACHE_TYPE": "SimpleCache",
+        "CACHE_DEFAULT_TIMEOUT": 300
+    }
     if not app:
         app = Flask(__name__)
 
+    app.config.from_mapping(config)
+    cache = Cache(app)
+
     # set configs, URLs, etc. to 'app'
     dashboardsObj = dashboards.Dashboards()
-    initialize_routes(app, dashboardsObj)
+    initialize_routes(app, cache, dashboardsObj)
 
     return app
 
 
-def initialize_routes(app, dashboardsObj):
+def initialize_routes(app, cache, dashboardsObj):
+
     @app.route("/getdashboards", methods=["POST"])
     def get_dashboards():
         user_id = request.json['userid']
@@ -59,6 +68,7 @@ def initialize_routes(app, dashboardsObj):
         return jsonify({"status": status})
 
     @app.route("/executequery", methods=["POST"])
+    @cache.cached(timeout=300)
     def execute_query():
         user_id = request.json['userid']
         dashboard_name = request.json['dashboard_name']

@@ -5,8 +5,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import axios from 'axios'
 import { TextField, Container, FormControl, Select, InputLabel, MenuItem, Paper, Grid } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
-import { DataGrid } from '@material-ui/data-grid';
-import createPlotlyComponent from 'react-plotly.js/factory'
+import createPlotlyComponent from 'react-plotly.js/factory';
+import Yasgui from "@triply/yasgui";
+import "@triply/yasgui/build/yasgui.min.css";
+
 
 export default function Canvas() {
     const useStyles = makeStyles((theme) => ({
@@ -57,6 +59,7 @@ export default function Canvas() {
     const [selectedValue, setSelectedValue] = useState("")
     const [xValues, setxValues] = useState([])
     const [yValues, setyValues] = useState([])
+    const [isYasguiLoaded, setYasguiLoaded] = useState(false)
 
     const loadDashboard = () => {
         localStorage.setItem('userid', 'karan@dbpedia.org')
@@ -202,7 +205,28 @@ export default function Canvas() {
         })
     }
 
-    useEffect(loadDashboard, [])
+    const setupYasgui = () => {
+        var loadYasgui = setInterval(() => {
+            console.log("yasgui-ing")
+            let yasguiBlock = document.getElementById("yasgui")
+            if (yasguiBlock != null) {
+                console.log("yasgui found")
+                const yasgui = new Yasgui(yasguiBlock);
+                let tab = yasgui.getTab();
+                tab.setEndpoint(endpointField.current.value)
+                setYasguiLoaded(true)
+                killInterval(loadYasgui)
+            }
+        }, 100)
+
+        const killInterval = (loadYasgui) => {
+            clearInterval(loadYasgui)
+        }
+    }
+
+    useEffect(() => {
+        loadDashboard()
+    }, [])
 
     return (
         <div>
@@ -233,6 +257,7 @@ export default function Canvas() {
                                 onClick={() => {
                                     setColumns([])
                                     setRecords([])
+                                    setupYasgui()
                                     setLoginFormShow(true)
                                 }}>
                                 Add Block
@@ -271,8 +296,10 @@ export default function Canvas() {
                             keyboard="false">
                             <Modal.Body className={"modal-body-spacing"}>
 
+                                <div id="yasgui" />
+
                                 {/* SPARQL query text field */}
-                                <span className={classes.root}>
+                                {/* <span className={classes.root}>
                                     <TextField
                                         inputRef={query}
                                         label="SPARQL Endpoint"
@@ -286,15 +313,15 @@ export default function Canvas() {
                                         onClick={() => executeQuery()}>
                                         Execute
                                     </button>
-                                </span>
+                                </span> */}
 
                                 {/* Table to display the output of SPARQL query execution */}
-                                <div style={{ height: 250, width: "100%" }}>
+                                {/* <div style={{ height: 250, width: "100%" }}>
                                     <DataGrid
                                         rows={records}
                                         columns={columns}
                                         pageSize={5} />
-                                </div>
+                                </div> */}
 
                                 {/* Visualization Controller */}
                                 <Container>

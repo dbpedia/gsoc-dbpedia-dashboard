@@ -3,22 +3,22 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import * as Keycloak from 'keycloak-js'
+// import * as Keycloak from 'keycloak-js'
 
-const keycloakInit = () => {
-  var keycloak = new Keycloak({
-      url: 'https://databus.dbpedia.org/auth/',
-      realm: 'databus',
-      clientId: 'dbpedia-dashboard',
-      onLoad: 'login-required'
-  })
+// const keycloakInit = () => {
+//   var keycloak = new Keycloak({
+//       url: 'https://databus.dbpedia.org/auth/',
+//       realm: 'databus',
+//       clientId: 'dbpedia-dashboard',
+//       onLoad: 'login-required'
+//   })
 
-  keycloak.init({onLoad: 'login-required'}).then((authenticated) => {
-      console.log(authenticated);
-  }).catch(() => {
-      console.log("failed")
-  })
-}
+//   keycloak.init({onLoad: 'login-required'}).then((authenticated) => {
+//       console.log(authenticated);
+//   }).catch(() => {
+//       console.log("failed")
+//   })
+// }
 
 // useEffect(keycloakInit, [])
 
