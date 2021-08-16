@@ -1,40 +1,45 @@
-import React from 'react'
+import {React, useEffect} from 'react'
+import './Main.css'
 import { Card, Button } from 'react-bootstrap'
+import * as Keycloak from 'keycloak-js'
 
 export default function Main() {
 
+    var keycloak = new Keycloak({
+        url: 'https://databus.dbpedia.org/auth/',
+        realm: 'databus',
+        clientId: 'dbpedia-dashboard',
+        onLoad: 'login-required'
+    })
+
+    const keycloakInit = () => {        
+        keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
+            console.log(authenticated)
+        }).catch(() => {
+            console.log("failed")
+        })
+    }
+
+    // useEffect(keycloakInit, [])
+
+    const login = () => {
+        keycloakInit()
+    }
+    
     return (
-        <div style={{backgroundImage: "linear-gradient(to right, #243949 0%, #517fa4 100%);"}} >
+        <div className="text-center">
             <div>
-                <div className="waveWrapper waveAnimation">
-                    <div className="waveWrapperInner bgTop">
-                        <div className="wave waveTop" style={{ backgroundImage: "url('http://front-end-noobs.com/jecko/img/wave-top.png')" }}></div>
-                    </div>
-                    <div className="waveWrapperInner bgMiddle">
-                        <div className="wave waveMiddle" style={{ backgroundImage: "url('http://front-end-noobs.com/jecko/img/wave-mid.png')" }}></div>
-                    </div>
-                    <div className="waveWrapperInner bgBottom">
-                        <div className="wave waveBottom" style={{ backgroundImage: "url('http://front-end-noobs.com/jecko/img/wave-bot.png')" }}></div>
-                    </div>
-                </div>
+                <Card className="welcome-card w-50">
+                    <Card.Body>
+                        <Card.Text>
+                            Welcome to the DBpedia's visualization platform
+                        </Card.Text>
+                        <div className="text-center">
+                            <Button className="login-button" onClick={() => login()}>Login</Button>
+                        </div>
+                    </Card.Body>
+                </Card>
             </div>
-            <Card className="welcome-card">
-                <Card.Body>
-                    <Card.Text>
-                        Welcome to the DBpedia's visualization platform
-                    </Card.Text>
-                    <div className="text-center">
-                        <Button className="login-button">Login</Button>
-                    </div>
-                </Card.Body>
-            </Card>
-            <Card className="title-card">
-                <Card.Body>
-                    <Card.Text>
-                        Knowledge Graphs Visualization
-                    </Card.Text>
-                </Card.Body>
-            </Card>
         </div>
     )
 

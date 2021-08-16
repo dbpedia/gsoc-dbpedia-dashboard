@@ -1,0 +1,18 @@
+.welcome-card {
+    font-family: 'Krona One', sans-serif;
+    color: white;
+    font-size: 2em;
+    border-radius: 25px 25px 25px 25px;
+    opacity: 0.9;
+    height: 8em;
+    background-image: linear-gradient(15deg, #13547a 0%, #80d0c7 100%);
+  }
+  
+.login-button {
+  background-image: linear-gradient(-60deg, #ff5858 0%, #f09819 100%);
+  border: none;
+  border-radius: 15px;
+  font-size: 0.7em;
+  margin: 0 auto;
+  width: 6em;
+}

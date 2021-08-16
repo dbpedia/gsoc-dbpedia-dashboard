@@ -19,9 +19,6 @@ function App() {
                 </Link>
                 <span className="text-white align-middle p-2">DBpedia Visualization Platform</span>
               </div>
-              <div>
-                <Login />
-              </div>
             </div>
           </nav>
         </div>

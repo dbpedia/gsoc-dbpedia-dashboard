@@ -58,8 +58,7 @@ export default function Canvas() {
     const [selectedLabel, setSelectedLabel] = useState("")
     const [selectedValue, setSelectedValue] = useState("")
     const [xValues, setxValues] = useState([])
-    const [yValues, setyValues] = useState([])
-    const [isYasguiLoaded, setYasguiLoaded] = useState(false)
+    const [yValues, setyValues] = useState([])    
 
     const loadDashboard = () => {
         localStorage.setItem('userid', 'karan@dbpedia.org')
@@ -207,14 +206,12 @@ export default function Canvas() {
 
     const setupYasgui = () => {
         var loadYasgui = setInterval(() => {
-            console.log("yasgui-ing")
             let yasguiBlock = document.getElementById("yasgui")
             if (yasguiBlock != null) {
                 console.log("yasgui found")
                 const yasgui = new Yasgui(yasguiBlock);
                 let tab = yasgui.getTab();
                 tab.setEndpoint(endpointField.current.value)
-                setYasguiLoaded(true)
                 killInterval(loadYasgui)
             }
         }, 100)
