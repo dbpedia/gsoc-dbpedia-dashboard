@@ -1,7 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import './App.css';
 import Main from './components/Main/Main';
-import Login from './components/Login/Login';
 import Home from "./components/Home/Home";
 import Canvas from "./components/Canvas/Canvas";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom"

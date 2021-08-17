@@ -53,7 +53,6 @@ export default function Home() {
     const [rows, setRows] = useState([]);
 
     const getDashboards = () => {
-        localStorage.setItem('userid', 'karan@dbpedia.org')
         axios.post('/getdashboards', {
             "userid": localStorage.getItem('userid')
         }).then((response) => {
@@ -74,7 +73,6 @@ export default function Home() {
 
     const addDashboard = (event) => {
         event.preventDefault();
-        localStorage.setItem('userid', 'karan@dbpedia.org')
         let dashboardName = dashboardsNameField.current.value;
 
         if (dashboardName && dashboardName.trim().length > 0) {

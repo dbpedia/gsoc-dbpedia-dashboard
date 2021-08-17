@@ -61,7 +61,6 @@ export default function Canvas() {
     const [yValues, setyValues] = useState([])    
 
     const loadDashboard = () => {
-        localStorage.setItem('userid', 'karan@dbpedia.org')
         axios.post('/getdashboard', {
             "user_id": localStorage.getItem("userid"),
             "dashboard_name": params['dashboard']
@@ -109,7 +108,6 @@ export default function Canvas() {
         if (sparqlEndpoint && sparqlEndpoint.trim().length > 0) {
             let status = endpointActionBtn.current.innerHTML
             if (status === "Save Endpoint") {
-                localStorage.setItem('userid', 'karan@dbpedia.org')
                 axios.post('/saveendpoint', {
                     "userid": localStorage.getItem('userid'),
                     "dashboard_name": params['dashboard'],
@@ -128,7 +126,6 @@ export default function Canvas() {
 
     const executeQuery = () => {
         let sparqlQuery = query.current.value
-        localStorage.setItem('userid', 'karan@dbpedia.org')
         if (sparqlQuery && sparqlQuery.trim().length > 0) {
             axios.post("/executequery", {
                 "userid": localStorage.getItem("userid"),
@@ -183,7 +180,6 @@ export default function Canvas() {
     }
 
     const saveBlock = () => {
-        localStorage.setItem('userid', 'karan@dbpedia.org')
         axios.post('/savedashboardblock', {
             "userid": localStorage.getItem("userid"),
             "dashboard_name": params['dashboard'],
