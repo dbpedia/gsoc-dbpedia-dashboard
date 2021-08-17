@@ -1,32 +1,45 @@
-import {React, useEffect} from 'react'
+import { Component, React, useEffect, useState } from 'react'
 import './Main.css'
 import { Card, Button } from 'react-bootstrap'
-import * as Keycloak from 'keycloak-js'
+import Keycloak from 'keycloak-js'
 
 export default function Main() {
 
-    var keycloak = new Keycloak({
-        url: 'https://databus.dbpedia.org/auth/',
-        realm: 'databus',
-        clientId: 'dbpedia-dashboard',
-        onLoad: 'login-required'
-    })
+    useEffect(() => {
+        if (localStorage.getItem("loginClicked") != null) {
+            login()
+        }
+    }, [])
 
-    const keycloakInit = () => {        
-        keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
-            console.log(authenticated)
-        }).catch(() => {
-            console.log("failed")
+    const saveUserInfo = (keycloakObj, authenticated) => {
+        if (authenticated) {
+            console.log(keycloakObj)
+            localStorage.setItem("userid", keycloakObj["tokenParsed"]["email"])
+        } else {
+            console.log("Authentication failed")
+        }
+    }
+
+    const login = () => {
+        const keycloak = new Keycloak({
+            url: 'https://databus.dbpedia.org/auth/',
+            realm: 'databus',
+            clientId: 'dbpedia-dashboard',
+            onLoad: 'login-required'
+        })
+
+        localStorage.setItem("loginClicked", true)
+
+        keycloak.init({ onLoad: 'login-required', flow: 'implicit' }).then((authenticated) => {
+            localStorage.setItem('keycloak', keycloak)
+            localStorage.setItem('authenticated', authenticated)
+            localStorage.setItem("loginClicked", false)
+            saveUserInfo(keycloak, authenticated)
         })
     }
 
-    // useEffect(keycloakInit, [])
-
-    const login = () => {
-        keycloakInit()
-    }
-    
     return (
+
         <div className="text-center">
             <div>
                 <Card className="welcome-card w-50">
@@ -41,6 +54,8 @@ export default function Main() {
                 </Card>
             </div>
         </div>
+
+
     )
 
 }

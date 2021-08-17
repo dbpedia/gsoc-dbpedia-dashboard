@@ -1,47 +1,31 @@
-import React from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import './Login.css'
-import * as Keycloak from 'keycloak-js'
+import Keycloak from 'keycloak-js'
 
-export default function Login() {
+class Login extends Component {
 
-    // function keycloakInit() {
-    //     var keycloak = new Keycloak({
-    //         url: 'https://databus.dbpedia.org/auth/',
-    //         realm: 'databus',
-    //         clientId: 'dbpedia-dashboard',
-    //         onLoad: 'login-required'
-    //     })
+    componentDidMount() {
 
-    //     keycloak.init({onLoad: 'login-required'}).then((authenticated) => {
-    //         console.log(authenticated);
-    //     }).catch(() => {
-    //         console.log("failed")
-    //     })
-    // }
+        const keycloak = new Keycloak({
+            url: 'https://databus.dbpedia.org/auth/',
+            realm: 'databus',
+            clientId: 'dbpedia-dashboard',
+            onLoad: 'login-required'
+        })
 
-    // localStorage.setItem("react-token", keycloak.token);
-    // localStorage.setItem("react-refresh-token", keycloak.refreshToken);
-    // setTimeout(() => {
-    //     keycloak.updateToken(70).success((refreshed) => {
-    //         if (refreshed) {
-    //             console.debug('Token refreshed' + refreshed);
-    //         } else {
-    //             console.warn('Token not refreshed, valid for '
-    //                 + Math.round(keycloak.tokenParsed.exp + keycloak.timeSkew - new Date().getTime() / 1000) + ' seconds');
-    //         }
-    //     }).error(() => {
-    //         console.error('Failed to refresh token');
-    //     });
+        keycloak.init({ onLoad: 'login-required', flow: 'implicit' }).then((authenticated) => {
+            localStorage.setItem('keycloak', keycloak)
+            localStorage.setItem('authenticated', authenticated)
+            console.log(keycloak)
+            console.log(authenticated)
+        })
 
+    }
 
-    // }, 60000)
-
-    return (
-        <>
-            {/* <span className="material-icons md-48 md-light align-middle" onClick={() => setLoginFormShow(true)}> */}
-            <span className="material-icons md-48 md-light align-middle" >
-                account_circle
-            </span>
-        </>
-    )
+    render() {
+        return (
+            <></>
+        )
+    }
 }
+export default Login;
