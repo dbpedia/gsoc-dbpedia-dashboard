@@ -14,6 +14,8 @@ In terms of solution, this project is about introducing user authentication just
 
 ![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/dashboard-list.png)
 
+![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/add-dashboard.png)
+
 ![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/yasqe-response.png)
 
 ![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/blocks.png)
