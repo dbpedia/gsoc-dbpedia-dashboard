@@ -12,6 +12,12 @@ In terms of solution, this project is about introducing user authentication just
 
 2) Next, the frontend (user interface) of the application is developed using ReactJS and material design. The frontend contains two components namely [YASQE](https://triply.cc/docs/yasgui-api) and [Plotly](https://plotly.com/) data visualization library. YASQE is the SPARQL query editor that efficiently executes the SPARQL queries and provides users an interface to view the results in a readable format. It also allows users to define multiple endpoints and execute queries on them in parallel. As it is a standard query editor, it shows prints the error messages if there are issues while executinig the SPARQL queries. For plotting the data, plotly library is used. At present, there are only basic data visualizations.
 
+![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/dashboard-list.png)
+
+![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/yasqe-response.png)
+
+![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/blocks.png)
+
 3) Finally, the backend of the application contains the APIs that are responsible for interacting with the database. Currently, users can create dashboards and add blocks to them. Here, the blocks represent a set of properties (i.e., SPARQL queries, selected visualization type, and the labels). The database stores information of these dashboards and isolate them as per users. To store such information and utilize the data efficiently, [MongoDB](https://www.mongodb.com/) is used in the form of docker container.
 
 ## Running on your local machine:
