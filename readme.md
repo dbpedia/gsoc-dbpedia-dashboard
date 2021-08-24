@@ -10,6 +10,8 @@ In terms of solution, this project is about introducing user authentication just
 
 1) The first major component of this project is the [keycloak](https://www.keycloak.org/) authentication. There is no need for users to register in order to use this platform because the credentials of DBpedia's [databus](https://databus.dbpedia.org/) are used in order to authenticate. For this, keycloak's frontend client is used as per the [documentation](https://www.keycloak.org/docs/latest/securing_apps/). Hence, this is the major entry point for the platform.
 
+2) Next, the frontend (user interface) of the application is developed using ReactJS and material design. The frontend contains two components namely [YASQE](https://triply.cc/docs/yasgui-api) and [Plotly](https://plotly.com/) data visualization library. YASQE is the SPARQL query editor that efficiently executes the SPARQL queries and provides users an interface to view the results in a readable format. It also allows users to define multiple endpoints and execute queries on them in parallel. As it is a standard query editor, it shows prints the error messages if there are issues while executinig the SPARQL queries. For plotting the data, plotly library is used. At present, there are only basic data visualizations.
+
 ## Development:
 - The project includes two portions, backend and frontend that are developed using ReactJS and Flask.
 
