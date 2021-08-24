@@ -22,6 +22,8 @@ In terms of solution, this project is about introducing user authentication just
 
 3) Finally, the backend of the application contains the APIs that are responsible for interacting with the database. Currently, users can create dashboards and add blocks to them. Here, the blocks represent a set of properties (i.e., SPARQL queries, selected visualization type, and the labels). The database stores information of these dashboards and isolate them as per users. To store such information and utilize the data efficiently, [MongoDB](https://www.mongodb.com/) is used in the form of docker container.
 
+![](https://raw.githubusercontent.com/dbpedia/gsoc-dbpedia-dashboard/develop/wiki/docker.png)
+
 ## Running on your local machine:
 Tools and Frameworks used for developing this system:
 1) [Flask](https://flask.palletsprojects.com/en/1.1.x/) framework (for backend operations and handling requests)
