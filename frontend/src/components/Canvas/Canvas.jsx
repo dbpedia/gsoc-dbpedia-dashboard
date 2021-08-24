@@ -51,14 +51,14 @@ export default function Canvas() {
     const endpointField = React.useRef()
     const endpointActionBtn = React.useRef()
     const addBlockBtn = React.useRef()
-    const query = React.useRef()
+    const [query, setQuery] = useState("")
     const [dashboardBlocks, setDashboardBlocks] = useState([])
     const [columns, setColumns] = useState([]);
     const [chartType, setChartType] = useState("")
     const [selectedLabel, setSelectedLabel] = useState("")
     const [selectedValue, setSelectedValue] = useState("")
     const [xValues, setxValues] = useState([])
-    const [yValues, setyValues] = useState([])    
+    const [yValues, setyValues] = useState([])
 
     const loadDashboard = () => {
         axios.post('/getdashboard', {
@@ -124,13 +124,14 @@ export default function Canvas() {
 
     }
 
-    const executeQuery = () => {
-        let sparqlQuery = query.current.value
-        if (sparqlQuery && sparqlQuery.trim().length > 0) {
+    const executeQuery = (qry) => {
+        setQuery(qry)
+        // let sparqlQuery = query.current.value
+        if (qry && qry.trim().length > 0) {
             axios.post("/executequery", {
                 "userid": localStorage.getItem("userid"),
                 "dashboard_name": params['dashboard'],
-                "sparql_query": sparqlQuery.trim()
+                "sparql_query": qry
             }).then((response) => {
                 let data = response["data"]
                 let responseRows = []
@@ -183,8 +184,8 @@ export default function Canvas() {
         axios.post('/savedashboardblock', {
             "userid": localStorage.getItem("userid"),
             "dashboard_name": params['dashboard'],
-            "sparql_query": query.current.value.trim(),
-            "chart_type": chartType.toString(),
+            "sparql_query": query,
+            "chart_type": chartType,
             "selected_label": selectedLabel.toString(),
             "selected_value": selectedValue.toString()
         }).then((response) => {
@@ -204,9 +205,13 @@ export default function Canvas() {
         var loadYasgui = setInterval(() => {
             let yasguiBlock = document.getElementById("yasgui")
             if (yasguiBlock != null) {
-                console.log("yasgui found")
                 const yasgui = new Yasgui(yasguiBlock);
                 let tab = yasgui.getTab();
+                let yasqeOps = tab.getYasqe()
+                let setOfColumns = [];
+                yasqeOps.on("query", () => {
+                    executeQuery(yasqeOps.getValueWithoutComments())
+                })
                 tab.setEndpoint(endpointField.current.value)
                 killInterval(loadYasgui)
             }
@@ -215,6 +220,7 @@ export default function Canvas() {
         const killInterval = (loadYasgui) => {
             clearInterval(loadYasgui)
         }
+
     }
 
     useEffect(() => {
